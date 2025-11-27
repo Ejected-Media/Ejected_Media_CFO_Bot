@@ -29,9 +29,9 @@ except ImportError:
 
 ```
 
-# 1. SETUP
-# If you are on Windows, you might need to point to the exe:
-# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+#### 1. SETUP
+If you are on Windows, you might need to point to the exe:
+_pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'_
 
 ```
 def extract_financials(image_path):
