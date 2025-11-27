@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFO Monitor | Ejected Media</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --accent: #3b82f6; }
+        body { background: var(--bg); color: var(--text); font-family: monospace; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 8px; border: 1px solid #334155; }
+        .big-number { font-size: 2.5rem; font-weight: bold; margin: 10px 0; }
+        .tx-list { list-style: none; padding: 0; }
+        .tx-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #334155; }
+        .tag { background: #334155; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <h1>EJECTED MEDIA // CFO MONITOR</h1>
+    <div id="status">🔴 Offline</div>
+
+    <div class="grid">
+        <div class="card">
+            <h2>TOTAL BURN</h2>
+            <div class="big-number" id="total-spend">$0.00</div>
+        </div>
+        <div class="card" style="border-color: #f59e0b;">
+            <h2 style="color: #f59e0b;">UP TO A BOIL (Project)</h2>
+            <div class="big-number" id="project-spend">$0.00</div>
+        </div>
+        <div class="card">
+            <h2>RECENT TRANSACTIONS</h2>
+            <ul class="tx-list" id="tx-feed"></ul>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot } 
+        from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+
+        // TODO: Replace with your actual Firebase Config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const q = query(collection(db, "transactions"), orderBy("timestamp", "desc"));
+
+        onSnapshot(q, (snapshot) => {
+            document.getElementById('status').innerText = "🟢 System Online";
+            let total = 0;
+            let projectTotal = 0;
+            const feed = document.getElementById('tx-feed');
+            feed.innerHTML = "";
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                total += data.amount;
+                if (data.project === "UpToABoil") projectTotal += data.amount;
+
+                const li = document.createElement('li');
+                li.className = "tx-item";
+                li.innerHTML = `<span>${data.category} <span class="tag">${data.project}</span></span> <span>-$${data.amount.toFixed(2)}</span>`;
+                feed.appendChild(li);
+            });
+
+            document.getElementById('total-spend').innerText = `$${total.toFixed(2)}`;
+            document.getElementById('project-spend').innerText = `$${projectTotal.toFixed(2)}`;
+        });
+    </script>
+</body>
+</html>
